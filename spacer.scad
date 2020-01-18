@@ -1,4 +1,3 @@
-
 // How high your spacer should be
 HEIGHT = 10; // [0.2:0.1:100]
 
@@ -8,11 +7,12 @@ WIDTH = 15; // [10:50]
 // How long your spcer should be
 LENGTH = 40; // [40:120]
 
-/* [Hidden] */
+// Hide these globals from the customizer
+module dummy() {};
 EPS = 0.01;
 
 module spacer(height=HEIGHT, width=WIDTH, length=LENGTH) {
-    
+
     fillet = min(width, length) / 3;
     chamfer = min(1, height / 3);
     engrave_depth = min(1, height/2);

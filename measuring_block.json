@@ -1,0 +1,16 @@
+{
+    "parameterSets": {
+        "Cirkelzaag": {
+            "DISTANCE_TO_BLADE": "31.2",
+            "KERF": "2.4",
+            "TEXT": "Cirkelzaag"
+        },
+        "Wipzaag": {
+            "DISTANCE_TO_BLADE": "34.7",
+            "KERF": "1.8",
+            "TEXT": "Wipzaag"
+        }
+    },
+    "parameterSets": "",
+    "fileFormatVersion": "1"
+}

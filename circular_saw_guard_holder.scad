@@ -11,6 +11,9 @@ x = LEVER+WIDTH;
 y = WALL + CUTOUT + WALL;
 z = HEIGHT + WALL;
 
+$fa = $preview? 12 : 6;
+$fs = $preview? 2 : 0.2;
+
 module xz_sketch() {
     offset(delta=-WALL/2, chamfer=true) offset(delta=WALL/2) difference() {
         square([x,z]);

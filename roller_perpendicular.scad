@@ -25,7 +25,7 @@ BEARING_COUNT = 3; // [2:6]
 // Make following globals private
 module dummy() {};
 
-$fa = $preview? 20 : 4;
+$fa = $preview? 20 : 6;
 $fs = $preview? 3 : 0.2;
 
 EPS = 0.01;

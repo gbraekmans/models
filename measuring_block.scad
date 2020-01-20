@@ -20,6 +20,9 @@ TEXT_HEIGHT = 1;
 CHAMFER = 1;
 EPS = 0.02;
 
+$fa = $preview? 12 : 6;
+$fs = $preview? 2 : 0.2;
+
 difference() {
     // Chamfered cube with embossed text
     translate([0,WIDTH/2]) {

@@ -11,6 +11,9 @@ LENGTH = 40; // [40:120]
 module dummy() {};
 EPS = 0.01;
 
+$fa = $preview? 12 : 6;
+$fs = $preview? 2 : 0.2;
+
 module spacer(height=HEIGHT, width=WIDTH, length=LENGTH) {
 
     fillet = min(width, length) / 3;

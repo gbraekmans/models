@@ -18,8 +18,8 @@ EPS = 0.01;
 SIZE = 2 * WALL + ROD_DIAMETER;
 TEXT_SIZE = 0.9 *  SIZE / len(str(ROD_DIAMETER));
 
-$fa = 6;
-$fs = 0.2;
+$fa = $preview? 12 : 6;
+$fs = $preview? 2 : 0.2;
 
 difference() {
     cube([SIZE, SIZE, SIZE], center=true); // the fixture

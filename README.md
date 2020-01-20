@@ -167,3 +167,13 @@ module skew(
     children();
 }
 ```
+
+## Default parameters based on other parameters
+
+Make the parameter equal undef and use something like this:
+
+```openscad
+function apply_default(v, d) = is_undef(v)? d : v;
+```
+
+to overwrite the parameter in the module body.

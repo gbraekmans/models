@@ -1,12 +1,5 @@
-
-
-// If the next assertion fails, it is because your diameter was set too low.
-// Assertion '(star_knob_get_washer_radius(s) >=
-//            (star_knob_get_bolt_head_radius(s) + WALL))' failed
-//
-
 // The value of the knob's largest cross-section
-DIAMETER = 35; // [10:80]
+DIAMETER = 45; // [10:90]
 
 // Generally unchecked for usage with bolts, checked for usage with nuts
 CUT_THROUGH = false;
@@ -24,113 +17,111 @@ BOLT_HEAD_HEIGHT = 5.1; // [1.5:0.1:20]
 // The number of places where you can put your fingers
 HANDLE_COUNT = 5; // [4:8]
 
+// The thickness of the walls
+WALL = 3; // [2:4]
 
-/* [Hidden] */
+// Hide the next globals
+module dummy() {};
 EPS = 0.01;
-WALL = 2;
 
-function star_knob_new(
-                       diameter=DIAMETER,
-                       bolt_diameter=BOLT_DIAMETER,
-                       bolt_head_diameter=BOLT_HEAD_DIAMETER,
-                       bolt_head_height=BOLT_HEAD_HEIGHT,
-                       handle_count=HANDLE_COUNT,
-                       cut_through=CUT_THROUGH) =
-    [
-        handle_count,
-        diameter,
-        bolt_diameter,
-        bolt_head_diameter,
-        bolt_head_height,
-        cut_through
-    ];
+$fa = $preview? 12 : 6;
+$fs = $preview? 2 : 0.2;
 
-function star_knob_get_handle_count(s) = s[0];
-function star_knob_get_outer_radius(s) = s[1] / 2;
-function star_knob_get_bolt_radius(s) = s[2] / 2;
-function star_knob_get_bolt_head_radius(s) = s[3] / 2;
-function star_knob_get_bolt_head_height(s) = s[4];
-function star_knob_get_bolt_cut_through(s) = s[5];
+function star_knob_washer_height(wall=WALL) = wall;
+function star_knob_washer_diameter(wall=WALL,
+                                   bolt_head_diameter=BOLT_HEAD_DIAMETER) =
+    bolt_head_diameter + 4 * wall;
 
-function star_knob_get_height(s) = star_knob_get_bolt_head_height(s) + 2 * WALL;
-function star_knob_get_cutout_radius(s) = 1.8 * star_knob_get_outer_radius(s) /
-                                          star_knob_get_handle_count(s);
-function star_knob_get_fillet_radius(s) = star_knob_get_cutout_radius(s) / 2;
-function star_knob_get_chamfer_radius(s) = min(
-        star_knob_get_outer_radius(s) / 10,
-        star_knob_get_height(s) / 7.5);
+function star_knob_height(wall=WALL, bolt_head_height=BOLT_HEAD_HEIGHT) =
+    bolt_head_height + 2 * wall;
 
-function star_knob_get_washer_radius(s) = star_knob_get_outer_radius(s) -
-    star_knob_get_cutout_radius(s) - WALL;
-
-// 2D sketch modules
-
-module star_knob_sketch(s) {
-    offset(r=star_knob_get_fillet_radius(s))
-    offset(delta=-star_knob_get_fillet_radius(s))
-    difference() {
-        circle(r=star_knob_get_outer_radius(s));
-        for(a=[0:360/star_knob_get_handle_count(s):360])
-            rotate(a)
-            translate([star_knob_get_outer_radius(s), 0])
-            circle(r=star_knob_get_cutout_radius(s));
-    }
+// moves an object to washer cutout center
+module star_knob_place_at_washer(wall=WALL, bolt_head_height=BOLT_HEAD_HEIGHT){
+translate([0,0, (bolt_head_height + wall) / 2]) children();
 }
 
-// 3D part modules
+// moves an object to the bolt cutout surface
+module star_knob_place_at_bolt(bolt_head_height=BOLT_HEAD_HEIGHT) {
+    translate([0,0, -bolt_head_height / 2]) children();
+}
 
-module star_knob_part_body(s) {
+module star_knob(
+    diameter=DIAMETER,
+    cut_through=CUT_THROUGH,
+    wall=WALL,
+    bolt_diameter=BOLT_DIAMETER,
+    bolt_head_diameter=BOLT_HEAD_DIAMETER,
+    bolt_head_height=BOLT_HEAD_HEIGHT,
+    handle_count=HANDLE_COUNT,
+    cutout_diameter=undef // depth of the cutouts
+) {
 
-    module double_cone(r) {
-        cylinder(r, r1=r, r2=0);
-        rotate([180,0]) cylinder(r, r1=r, r2=0);
+    function apply_default(v, d) = is_undef(v)? d : v;
+
+    cutout_diameter = apply_default(cutout_diameter,
+                                    1.8 * diameter / handle_count);
+
+    height = star_knob_height(wall, bolt_head_height);
+    fillet = cutout_diameter / 4;
+    chamfer = min( diameter / 20, height / 7.5);
+    
+    // make sure the washer fits the knob
+    assert(diameter - star_knob_washer_diameter(wall, bolt_head_diameter) -
+           cutout_diameter >= 2 * wall);
+
+    module body_sketch() {
+        offset(r=fillet) offset(delta=-fillet)
+        difference() {
+            circle(r=diameter/2);
+            for(a=[0:360/handle_count:360])
+                rotate(a)
+                translate([diameter/2, 0])
+                circle(r=cutout_diameter/2);
+        }
     }
+    
+    module body(s) {
 
-    minkowski() {
-        linear_extrude(star_knob_get_height(s) -
-                          2 * star_knob_get_chamfer_radius(s),
-                       center=true)
-            star_knob_sketch(s);
+        module double_cone(r) {
+            cylinder(r, r1=r, r2=0);
+            rotate([180,0]) cylinder(r, r1=r, r2=0);
+        }
+
+        minkowski() {
+            linear_extrude(height - 2 * chamfer,
+                           center=true)
+                body_sketch();
+            
+            double_cone(chamfer);
+        }
+    }
+    
+    difference() {
+        body();
         
-        double_cone(star_knob_get_chamfer_radius(s));
-    }
-}
-
-// Placement modules
-
-module star_knob_place_at_washer(s) {
-    translate([0,0,(star_knob_get_bolt_head_height(s) + WALL)/2]) children();
-}
-
-// 3D object modules
-
-module star_knob(s) {
-
-    assert(star_knob_get_washer_radius(s) >= 
-           star_knob_get_bolt_head_radius(s) + WALL);
-
-    difference() {
-        star_knob_part_body(s);
-        cylinder(star_knob_get_bolt_head_height(s),
-                 r=star_knob_get_bolt_head_radius(s),
-                 center=true,
+        // bolt head cutout
+        cylinder(bolt_head_height, r=bolt_head_diameter/2, center=true,
                  $fn=6);
-        star_knob_place_at_washer(s)
-            cylinder(WALL + 2*EPS, r=star_knob_get_washer_radius(s), center=true);
-        if (star_knob_get_bolt_cut_through(s))
-            translate([0,0,-(star_knob_get_bolt_head_height(s) + WALL)/2])
-                cylinder(WALL + 2*EPS, r=star_knob_get_bolt_radius(s), center=true);
+ 
+        // washer cutout
+        star_knob_place_at_washer(wall, bolt_head_height)
+            cylinder(wall + 2*EPS,
+                     r=star_knob_washer_diameter(wall, bolt_head_diameter)/2,
+                     center=true);
+        
+        // through cut
+        cylinder(height + 2*EPS, r=bolt_diameter/2, center=cut_through);
     }
 }
 
-module star_knob_washer(s) {
+module star_knob_washer(wall=WALL, bolt_diameter=BOLT_DIAMETER, 
+                        bolt_head_diameter=BOLT_HEAD_DIAMETER) {
     difference() {
-        cylinder(WALL, r=star_knob_get_washer_radius(s), center=true);
-        cylinder(WALL + 2*EPS, r=star_knob_get_bolt_radius(s), center=true);
+        cylinder(wall, r=star_knob_washer_diameter(wall, bolt_head_diameter)/2,
+                 center=true);
+        cylinder(wall + 2*EPS, r=bolt_diameter/2, center=true);
     }
 }
 
-s = star_knob_new();
-
-translate([0, 0, star_knob_get_height(s)/2]) star_knob(s);
-translate([star_knob_get_outer_radius(s) * 2, 0, WALL/2]) star_knob_washer(s);
+translate([0,0,star_knob_height()/2]) star_knob();
+translate([DIAMETER,0,star_knob_washer_height()/2]) star_knob_washer();

@@ -4,11 +4,13 @@ ROD_DIAMETER = 8; // [4:0.01:80]
 // minimum thickness of the walls
 WALL = 2; // [1:0.1:3]
 
-// the size of the clamping cutout
-CUTOUT = 1; // [0:0.1:4]
-
 // keep this smaller than the extrusion width
 ENGRAVE_DEPTH = 0.3; // [0.1:0.05:1]
+
+// a square cutout for drilling through the part
+DRILL_CUTOUT = true;
+
+
 
 // Make the following globals private
 module dummy() {};
@@ -17,6 +19,7 @@ EPS = 0.01;
 
 SIZE = 2 * WALL + ROD_DIAMETER;
 TEXT_SIZE = 0.9 *  SIZE / len(str(ROD_DIAMETER));
+CUTOUT = 1; // the width between two halves
 
 $fa = $preview? 12 : 6;
 $fs = $preview? 2 : 0.2;
@@ -32,8 +35,9 @@ difference() {
         cylinder(WALL/2, r2=ROD_DIAMETER/2, r1=(ROD_DIAMETER + WALL) / 2,
                  center=true);
     
-    rotate([0,90]) // square drilling cutout
-        cylinder(SIZE + EPS, r=ROD_DIAMETER/2, $fn=4); 
+    if(DRILL_CUTOUT)
+        translate([-SIZE/2 -EPS, 0 , 0]) rotate([0,90]) // square drilling cutout
+            cylinder(SIZE + 2* EPS, r=ROD_DIAMETER/2, $fn=4); 
     
     translate([SIZE/2,0]) // clamping cutout
         cube([SIZE, CUTOUT, SIZE + EPS], center=true);

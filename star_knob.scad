@@ -1,24 +1,37 @@
 // The value of the knob's largest cross-section
-DIAMETER = 45; // [10:90]
+DIAMETER = 45;
+
+// The thickness of the walls
+WALL = 3; // [2:0.25:4]
 
 // Generally unchecked for usage with bolts, checked for usage with nuts
 CUT_THROUGH = false;
 
-// The diameter of the shaft, add some clearance for a loose fit
-BOLT_DIAMETER = 6.5; // [2:0.1:20]
-
-// The diameter of the inscribed circle, or the size of wrench you need
-// Add some clearance if you're glueing the bolt
-BOLT_HEAD_DIAMETER = 10.2; // [4:0.1:30]
-
-// How high the head is, and half a layer clearance so you're sure it fits
-BOLT_HEAD_HEIGHT = 5.1; // [1.5:0.1:20]
+// If you're out of metal ones, print a plastic one
+ADD_WASHER = false;
 
 // The number of places where you can put your fingers
 HANDLE_COUNT = 5; // [4:8]
 
-// The thickness of the walls
-WALL = 3; // [2:4]
+/* [Bolt] */
+
+// The diameter of the shaft, add some clearance for a loose fit
+BOLT_DIAMETER = 6.4;
+
+// The diameter of the inscribed circle, or the size of wrench you need
+// Add some clearance if you're glueing the bolt
+BOLT_HEAD_DIAMETER = 10.2;
+
+// How high the head is, and half a layer clearance so you're sure it fits
+BOLT_HEAD_HEIGHT = 5.1;
+
+/* [Washer] */
+
+// The diameter of the washer
+WASHER_DIAMETER = 18.2;
+
+// The height of the washer
+WASHER_HEIGHT = 1.6;
 
 // Hide the next globals
 module dummy() {};
@@ -27,18 +40,8 @@ EPS = 0.01;
 $fa = $preview? 12 : 6;
 $fs = $preview? 2 : 0.2;
 
-function star_knob_washer_height(wall=WALL) = wall;
-function star_knob_washer_diameter(wall=WALL,
-                                   bolt_head_diameter=BOLT_HEAD_DIAMETER) =
-    bolt_head_diameter + 4 * wall;
-
 function star_knob_height(wall=WALL, bolt_head_height=BOLT_HEAD_HEIGHT) =
     bolt_head_height + 2 * wall;
-
-// moves an object to washer cutout center
-module star_knob_place_at_washer(wall=WALL, bolt_head_height=BOLT_HEAD_HEIGHT){
-translate([0,0, (bolt_head_height + wall) / 2]) children();
-}
 
 // moves an object to the bolt cutout surface
 module star_knob_place_at_bolt(bolt_head_height=BOLT_HEAD_HEIGHT) {
@@ -52,6 +55,8 @@ module star_knob(
     bolt_diameter=BOLT_DIAMETER,
     bolt_head_diameter=BOLT_HEAD_DIAMETER,
     bolt_head_height=BOLT_HEAD_HEIGHT,
+    washer_diameter=WASHER_DIAMETER,
+    washer_height=WASHER_HEIGHT,
     handle_count=HANDLE_COUNT,
     cutout_diameter=undef // depth of the cutouts
 ) {
@@ -66,8 +71,7 @@ module star_knob(
     chamfer = min( diameter / 20, height / 7.5);
     
     // make sure the washer fits the knob
-    assert(diameter - star_knob_washer_diameter(wall, bolt_head_diameter) -
-           cutout_diameter >= 2 * wall);
+    assert(diameter - washer_diameter - cutout_diameter >= 2 * wall);
 
     module body_sketch() {
         offset(r=fillet) offset(delta=-fillet)
@@ -100,13 +104,15 @@ module star_knob(
         body();
         
         // bolt head cutout
-        cylinder(bolt_head_height, r=bolt_head_diameter/2, center=true,
-                 $fn=6);
+        translate([0,0,-bolt_head_height/2])
+            cylinder(star_knob_height(wall, bolt_head_height),
+                     r=bolt_head_diameter/2, $fn=6);
  
         // washer cutout
-        star_knob_place_at_washer(wall, bolt_head_height)
-            cylinder(wall + 2*EPS,
-                     r=star_knob_washer_diameter(wall, bolt_head_diameter)/2,
+        translate([0,0,(star_knob_height(wall, bolt_head_height) - 
+                            washer_height)/2])
+            cylinder(washer_height + 2*EPS,
+                     r=washer_diameter/2,
                      center=true);
         
         // through cut
@@ -114,14 +120,19 @@ module star_knob(
     }
 }
 
-module star_knob_washer(wall=WALL, bolt_diameter=BOLT_DIAMETER, 
-                        bolt_head_diameter=BOLT_HEAD_DIAMETER) {
+module star_knob_washer(
+                        washer_diameter=WASHER_DIAMETER,
+                        washer_height=WASHER_HEIGHT,
+                        wall=WALL,
+                        bolt_diameter=BOLT_DIAMETER
+                        ) {
     difference() {
-        cylinder(wall, r=star_knob_washer_diameter(wall, bolt_head_diameter)/2,
+        cylinder(washer_height, r=washer_diameter/2,
                  center=true);
         cylinder(wall + 2*EPS, r=bolt_diameter/2, center=true);
     }
 }
 
 translate([0,0,star_knob_height()/2]) star_knob();
-translate([DIAMETER,0,star_knob_washer_height()/2]) star_knob_washer();
+if(ADD_WASHER)
+    translate([DIAMETER,0,WASHER_HEIGHT/2]) star_knob_washer();

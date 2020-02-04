@@ -33,7 +33,7 @@ BOLT_DIAMETER = 6.4;
 
 // The diameter of the inscribed circle, or the size of wrench you need
 // Add some clearance if you're glueing the bolt
-BOLT_HEAD_DIAMETER = 10.2;
+BOLT_HEAD_DIAMETER = 10.4;
 
 // How high the head is, and half a layer clearance so you're sure it fits
 BOLT_HEAD_HEIGHT = 5.1;
@@ -119,14 +119,15 @@ module star_knob(
         body();
         
         // bolt head cutout
-        translate([0,0,height/2 - washer_height - bolt_head_height]) cylinder(bolt_head_height, r=bolt_head_diameter/2,
+        translate([0,0,height/2 - washer_height - bolt_head_height]) cylinder(bolt_head_height + EPS, r=bolt_head_diameter/2,
                  $fn=6);
  
         // washer cutout
-        translate([0,0,(height - washer_height) / 2])
-            cylinder(washer_height + 2*EPS,
-                     r=washer_diameter/2,
-                     center=true);
+        if(washer_height > 0)
+            translate([0,0,(height - washer_height) / 2])
+                cylinder(washer_height + 2*EPS,
+                         r=washer_diameter/2,
+                         center=true);
         
         // through cut
         if(through_bore)

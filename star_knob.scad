@@ -119,8 +119,9 @@ module star_knob(
         body();
         
         // bolt head cutout
-        translate([0,0,height/2 - washer_height - bolt_head_height]) cylinder(bolt_head_height + EPS, r=bolt_head_diameter/2,
-                 $fn=6);
+        translate([0,0,height/2 - washer_height - bolt_head_height])
+            cylinder(bolt_head_height + EPS, r=bolt_head_diameter/2/cos(180/6),
+                     $fn=6);
  
         // washer cutout
         if(washer_height > 0)

@@ -88,7 +88,8 @@ module star_knob_fancy(
                 // the rounded polygon
                 for(a=[0:360/handles:360])
                     rotate(a) translate([hull_center, 0])
-                        cylinder(height - 2 * chamfer_height, r=cutout_radius, center=true);
+                        cylinder(height - 2 * chamfer_height, 
+                                 r=cutout_radius, center=true);
             // top & bottom chamfer
             cylinder(height, r=chamfer_radius, center=true);
         }
@@ -103,11 +104,14 @@ module star_knob_fancy(
                 cylinder(washer_height + EPS, r=washer_radius);
         
         // bolt head cutout
-        translate([0,0, height/2 - washer_height - bolt_head_height]) cylinder(bolt_head_height + EPS, r=bolt_head_radius, $fn=6);
+        translate([0,0, height/2 - washer_height - bolt_head_height])
+            cylinder(bolt_head_height + EPS, r=bolt_head_radius / cos(180/6),
+                     $fn=6);
         
         // bolt cutout
         if(through_bore)
-            translate([0,0, height/2 - washer_height - bolt_head_height + EPS]) rotate([180,0]) cylinder(height, r=bolt_radius);
+            translate([0,0, height/2 - washer_height - bolt_head_height + EPS])
+                rotate([180,0]) cylinder(height, r=bolt_radius);
     }    
 }
 
@@ -121,8 +125,11 @@ module star_knob_fancy_washer(
     chamfer_r = (washer_radius - washer_bushing_radius) / 2;
     
     rotate_extrude() offset(delta=-chamfer_r, chamfer=true) offset(delta=chamfer_r) {
-        translate([bolt_radius,0]) square([washer_radius - bolt_radius, washer_height]);
-        translate([bolt_radius,0]) square([washer_bushing_radius - bolt_radius, washer_bushing_height + washer_height]);
+        translate([bolt_radius,0])
+            square([washer_radius - bolt_radius, washer_height]);
+        translate([bolt_radius,0])
+            square([washer_bushing_radius - bolt_radius,
+                    washer_bushing_height + washer_height]);
     }
 }
 

@@ -135,11 +135,13 @@ module roller_square_parallel(
         for(a=[0,90,180])
             rotate([a,0]) translate([0,tube_size/2]) children();
     }
+
+    screw_wing_r = (screw_countersink? screw : (screw / 2)) + wall;
     
     module place_screw_wings() {
         reflect([1,0,0]) reflect([0,1,0]) 
-            translate([-width/2+screw+wall,
-                       screw+wall+t_hei/2+wall, -t_hei/2 - wall]) children();
+            translate([-width/2+screw_wing_r,
+                       screw_wing_r+t_hei/2+wall, -t_hei/2 - wall]) children();
     }
 
     difference() {
@@ -153,7 +155,7 @@ module roller_square_parallel(
             
             // screw wings
             place_screw_wings() linear_extrude(screw_wing_height)
-                screw_wing(screw+wall);
+                screw_wing(screw_wing_r);
         }
         
         // tube cutout

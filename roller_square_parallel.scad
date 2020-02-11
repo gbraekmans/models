@@ -4,6 +4,14 @@
  *  Should be used in combination with a downward force on the
  *  upper bearing. You may need to tweak the parameters to get
  *  the right tension on the bearings.
+ *
+ *  By default this model should be used with:
+ *  
+ *  - M8 x 30 DIN 912 Socket cap screws
+ *  - M8 DIN 985 Nylon insert nuts
+ *  - 608-2rs bearings
+ *  - 4 x ? Countersunk screws
+ *
  */
  
  // TODO: Add the option to add fourth bearing below

@@ -36,7 +36,7 @@ BOLT_DIAMETER = 6.4;
 
 // The diameter of the inscribed circle, or the size of wrench you need
 // Add some clearance if you're glueing the bolt
-BOLT_HEAD_DIAMETER = 10.4;
+BOLT_HEAD_DIAMETER = 10.1;
 
 // How high the head is, and half a layer clearance so you're sure it fits
 BOLT_HEAD_HEIGHT = 5.1;
@@ -88,8 +88,8 @@ module star_knob_fancy(
                 // the rounded polygon
                 for(a=[0:360/handles:360])
                     rotate(a) translate([hull_center, 0])
-                        cylinder(height - 2 * chamfer_height, 
-                                 r=cutout_radius, center=true);
+                        cylinder(height - 2 * chamfer_height, r=cutout_radius,
+                                 center=true);
             // top & bottom chamfer
             cylinder(height, r=chamfer_radius, center=true);
         }
@@ -124,12 +124,13 @@ module star_knob_fancy_washer(
                         ) {
     chamfer_r = (washer_radius - washer_bushing_radius) / 2;
     
-    rotate_extrude() offset(delta=-chamfer_r, chamfer=true) offset(delta=chamfer_r) {
-        translate([bolt_radius,0])
-            square([washer_radius - bolt_radius, washer_height]);
-        translate([bolt_radius,0])
-            square([washer_bushing_radius - bolt_radius,
-                    washer_bushing_height + washer_height]);
+    rotate_extrude()
+        offset(delta=-chamfer_r, chamfer=true) offset(delta=chamfer_r) {
+            translate([bolt_radius,0])
+                square([washer_radius - bolt_radius, washer_height]);
+            translate([bolt_radius,0])
+                square([washer_bushing_radius - bolt_radius,
+                        washer_bushing_height + washer_height]);
     }
 }
 

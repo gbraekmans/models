@@ -1,14 +1,33 @@
-BEAM = 45;
+/*
+ *
+ *  You might need supports for this model if your printer or
+ *  filament is not so suited for printing bridges.
+ *
+ */
 
-TUBE = 30;
 
-WALL = 3;
+/* [Tube holder] */
 
-SCREW = 4;
+// the size of the vertical posts
+BEAM = 45.1;
+
+// the size of the horizontal steel square tubing
+TUBE = 30.2;
+
+// wall size of the printed plastic holder
+WALL = 3.5;
+
+// diameter of the screws
+SCREW = 4; // [2:0.1:6]
+
+module dummy() {};
+
+$fa = $preview? 12 : 4;
+$fs = $preview? 2 : 0.2;
 
 EPS = 0.01;
 
-module mounting_bracket(
+module tube_holder(
     beam=BEAM,
     tube=TUBE,
     wall=WALL,
@@ -53,4 +72,4 @@ module mounting_bracket(
 
 }
 
-mounting_bracket();
+rotate([180,0]) tube_holder();

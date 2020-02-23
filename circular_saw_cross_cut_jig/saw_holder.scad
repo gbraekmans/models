@@ -1,10 +1,23 @@
+/*
+ *
+ *  In general you'll need 4 of these to constrain the
+ *  foot of your circular saw.
+ *
+ */
+
+/* [Saw holder] */
+
 HEIGHT = 10;
-
 WIDTH = 10;
-
 LENGTH = 50;
 
+// Diameter of the screw
 SCREW = 4;
+
+module dummy() {};
+
+$fa = $preview? 12 : 4;
+$fs = $preview? 2 : 0.2;
 
 EPS = 0.01; 
 
@@ -36,5 +49,7 @@ module saw_holder(
         translate([-length/2 + width/2, width/2, height/2 - screw/2 + EPS]) cylinder(screw/2, r1=screw/2, r2=screw);
     }
 }
+
+assert(WIDTH >= 2 * SCREW);
 
 saw_holder();

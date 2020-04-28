@@ -15,25 +15,28 @@ PRINT_WASHER = false;
 /* [Knob] */
 
 // The value of the knob's largest cross-section
-DIAMETER = 32;
+DIAMETER = 35;
+
+// The largest circle which can fit inside the knob
+INNER_DIAMETER = 22;
 
 // The height of the knob
 HEIGHT = 10;
 
+// The number of places where you can put your fingers
+HANDLES = 5; // [4:8]
+
 // Generally unchecked for usage with bolts, checked for usage with nuts
 THROUGH_BORE = false;
-
-// The number of places where you can put your fingers
-HANDLE_COUNT = 7; // [4:8]
 
 /* [Bolt] */
 
 // The diameter of the shaft, add some clearance for a loose fit
-BOLT_DIAMETER = 6.4;
+BOLT_DIAMETER = 6.25;
 
 // The diameter of the inscribed circle, or the size of wrench you need
 // Add some clearance if you're glueing the bolt
-BOLT_HEAD_DIAMETER = 10.4;
+BOLT_HEAD_DIAMETER = 10.25;
 
 // How high the head is, and half a layer clearance so you're sure it fits
 BOLT_HEAD_HEIGHT = 5.1;
@@ -64,59 +67,65 @@ module star_knob_place_at_bolt(bolt_head_height=BOLT_HEAD_HEIGHT) {
     translate([0,0, -bolt_head_height / 2]) children();
 }
 
-module star_knob(
-    diameter=DIAMETER,
-    through_bore=THROUGH_BORE,
+module star_knob_body(
+    radius=DIAMETER/2,
+    inner_radius = INNER_DIAMETER / 2,
     height=HEIGHT,
-    bolt_diameter=BOLT_DIAMETER,
-    bolt_head_diameter=BOLT_HEAD_DIAMETER,
-    bolt_head_height=BOLT_HEAD_HEIGHT,
-    washer_diameter=WASHER_DIAMETER,
-    washer_height=WASHER_HEIGHT,
-    handle_count=HANDLE_COUNT,
-    cutout_diameter=undef // depth of the cutouts
+    handles=HANDLES
 ) {
-
-    function apply_default(v, d) = is_undef(v)? d : v;
-
-    cutout_diameter = apply_default(cutout_diameter,
-                                    1.8 * diameter / handle_count);
-
-    fillet = cutout_diameter / 4;
-    chamfer = min( diameter / 20, height / 7.5);
+    assert(radius > inner_radius);
     
-    // make sure the washer fits the knob and there is a 1 unit wall
-    assert(diameter - washer_diameter - cutout_diameter >= 2);
+    cutout_radius = radius - inner_radius;
+    fillet = cutout_radius / 2;
+    chamfer = min( radius / 10, height / 7.5);
 
     module body_sketch() {
         offset(r=fillet) offset(delta=-fillet)
         difference() {
-            circle(r=diameter/2);
-            for(a=[0:360/handle_count:360])
+            circle(r=radius - chamfer);
+            for(a=[0:360/handles:360])
                 rotate(a)
-                translate([diameter/2, 0])
-                circle(r=cutout_diameter/2);
+                    translate([radius, 0])
+                        circle(r=cutout_radius);
         }
     }
+
+    module double_cone(r) {
+        cylinder(r, r1=r, r2=0);
+        rotate([180,0]) cylinder(r, r1=r, r2=0);
+    }
+
+    rotate(-90) minkowski() {
+        linear_extrude(height - 2 * chamfer,
+                       center=true)
+            body_sketch();
+        
+        double_cone(chamfer);
+    }
+
+}
+
+module star_knob(
+    radius=DIAMETER/2,
+    inner_radius = INNER_DIAMETER / 2,
+    height=HEIGHT,
+    handles=HANDLES,
+    through_bore=THROUGH_BORE,
+    bolt_diameter=BOLT_DIAMETER,
+    bolt_head_diameter=BOLT_HEAD_DIAMETER,
+    bolt_head_height=BOLT_HEAD_HEIGHT,
+    washer_diameter=WASHER_DIAMETER,
+    washer_height=WASHER_HEIGHT
+) {
     
-    module body(s) {
-
-        module double_cone(r) {
-            cylinder(r, r1=r, r2=0);
-            rotate([180,0]) cylinder(r, r1=r, r2=0);
-        }
-
-        minkowski() {
-            linear_extrude(height - 2 * chamfer,
-                           center=true)
-                body_sketch();
-            
-            double_cone(chamfer);
-        }
-    }
+    assert(washer_diameter <= inner_radius * 2);
     
     difference() {
-        body();
+        star_knob_body(
+            radius=radius,
+            inner_radius=inner_radius,
+            height=height,
+            handles=handles);
         
         // bolt head cutout
         translate([0,0,height/2 - washer_height - bolt_head_height])

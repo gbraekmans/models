@@ -11,20 +11,20 @@ PRINT_WASHER = false;
 // The value of the knob's largest cross-section
 DIAMETER = 35;
 
+// The largest circle which can fit inside the knob
+INNER_DIAMETER = 22;
+
 // Height of the knob
 HEIGHT = 12;
 
 // Amount of cutouts in the knob
 HANDLES = 5;
 
+// The depth of the handle cutouts into the knob
+CUTOUT_DEPTH_PCT = 0.66; // [0:0.01:1]
+
 // The angle of the chamfer
 CHAMFER_ANGLE = 15; // [0:45]
-
-// The depth of the chamfer into the knob
-CHAMFER_DISTANCE = 6;
-
-// The depth of the handle cutouts into the knob
-CUTOUT_DEPTH = 4;
 
 // Generally unchecked for usage with bolts, checked for usage with nuts
 THROUGH_BORE = false;
@@ -62,28 +62,23 @@ $fs = $preview? 2 : 0.2;
 
 EPS = 0.01;
 
-module star_knob_fancy(
+module star_knob_fancy_body(
     radius=DIAMETER / 2,
+    inner_radius=INNER_DIAMETER/2,
     height=HEIGHT,
-    chamfer_radius=DIAMETER / 2 - CHAMFER_DISTANCE,
-    chamfer_height=tan(CHAMFER_ANGLE) * CHAMFER_DISTANCE,
     handles=HANDLES,
-    cutout_depth=CUTOUT_DEPTH,
-    bolt_radius=BOLT_DIAMETER/2,
-    bolt_head_radius=BOLT_HEAD_DIAMETER/2,
-    bolt_head_height=BOLT_HEAD_HEIGHT,
-    washer_radius = WASHER_DIAMETER/2,
-    washer_height = WASHER_HEIGHT,
-    through_bore = THROUGH_BORE
-      ) {
-
+    cutout_depth_pct=CUTOUT_DEPTH_PCT,
+    chamfer_angle=CHAMFER_ANGLE
+) {
+    chamfer_distance = radius - inner_radius;
+    cutout_depth = cutout_depth_pct * chamfer_distance;
+    chamfer_radius = radius - chamfer_distance;
+    chamfer_height = tan(chamfer_angle) * chamfer_distance;
     cutout_radius = PI * radius / handles;
-
     hull_center = radius - cutout_radius;
-
     cutout_center = radius - cutout_depth + cutout_radius;
 
-    difference() {
+    rotate(90) difference() {
         hull() {
                 // the rounded polygon
                 for(a=[0:360/handles:360])
@@ -97,6 +92,35 @@ module star_knob_fancy(
         for(a=[180/handles:360/handles:360])
             rotate(a) translate([cutout_center, 0])
                 cylinder(height + 2 * EPS, r=cutout_radius, center=true);
+    }
+
+}
+
+module star_knob_fancy(
+    radius=DIAMETER / 2,
+    inner_radius=INNER_DIAMETER/2,
+    height=HEIGHT,
+    handles=HANDLES,
+    cutout_depth_pct=CUTOUT_DEPTH_PCT,
+    chamfer_angle=CHAMFER_ANGLE,
+    bolt_radius=BOLT_DIAMETER/2,
+    bolt_head_radius=BOLT_HEAD_DIAMETER/2,
+    bolt_head_height=BOLT_HEAD_HEIGHT,
+    washer_radius = WASHER_DIAMETER/2,
+    washer_height = WASHER_HEIGHT,
+    through_bore = THROUGH_BORE
+      ) {
+
+    difference() {
+
+        star_knob_fancy_body(
+            radius=radius,
+            inner_radius=inner_radius,
+            height=height,
+            handles=handles,
+            chamfer_angle=chamfer_angle,
+            cutout_depth_pct=cutout_depth_pct
+        );
         
         // washer cutout
         if(washer_height > 0)

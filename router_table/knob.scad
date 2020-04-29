@@ -38,7 +38,7 @@ module handle() {
     rotate([180,0,0])
     translate([0,0,HANDLE_HEIGHT/2])
     difference() {
-            star_knob_body(
+            star_knob_modern_body(
                 radius=HANDLE_DIAMETER / 2,
                 inner_radius=HANDLE_INNER_DIAMETER / 2,
                 height=HANDLE_HEIGHT

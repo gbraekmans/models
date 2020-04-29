@@ -29,9 +29,6 @@ module yz_sketch() {
     }
 }
 
-$fa = 6;
-$fs = 0.2;
-
 intersection() {
     translate([0,WALL+CUTOUT+WALL,0]) rotate([90,0])
         linear_extrude(WALL+CUTOUT+WALL) xz_sketch();

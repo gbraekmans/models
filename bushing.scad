@@ -2,27 +2,27 @@
 /* [Bushing] */
 
 // The outer diameter of the bushing
-BUSHING_DIAMETER = 32.9;
+DIAMETER = 33.15;
 
 // The height of the bushing
-BUSHING_HEIGHT = 50;
+HEIGHT = 50;
 
 // Thickness of the wall
-BUSHING_WALL = 2;
+WALL = 2;
 
 // Radius of the chamfer
-BUSHING_CHAMFER = 2;
+CHAMFER = 2;
 
 /* [Rod] */
 
 // Diameter of the linear smooth rod
-ROD_DIAMETER = 24.9;
+ROD_DIAMETER = 25.15;
 
 // The amount of pins connecting to the rod
-ROD_PINS = 12; // [3:100]
+PINS = 12; // [3:100]
 
 // Percentage of rod circumference covered by pins
-ROD_PIN_COVERAGE = 0.5; // [0:0.01:1.01]
+PIN_COVERAGE = 0.5; // [0:0.01:1.01]
 
 module dummy() {};
 $fa = $preview? 12 : 6;
@@ -32,8 +32,8 @@ EPS = 0.01;
 module rod_negative_sketch(
     inner_radius=ROD_DIAMETER/2,
     outer_radius=1.2 * ROD_DIAMETER/2,
-    pins=ROD_PINS,
-    pin_coverage=1-ROD_PIN_COVERAGE
+    pins=PINS,
+    pin_coverage=1-PIN_COVERAGE
 ) {
     assert(pin_coverage <= 1);
     assert(pin_coverage >= 0);
@@ -58,11 +58,11 @@ module rod_negative_sketch(
 }
 
 module bushing_sketch(
-    outer_radius=BUSHING_DIAMETER/2,
+    outer_radius=DIAMETER/2,
     inner_radius=ROD_DIAMETER/2,
-    wall=BUSHING_WALL,
-    pins=ROD_PINS,
-    pin_coverage=ROD_PIN_COVERAGE
+    wall=WALL,
+    pins=PINS,
+    pin_coverage=PIN_COVERAGE
 ) {
 
     assert(inner_radius + wall < outer_radius);
@@ -82,13 +82,13 @@ module bushing_sketch(
 }
 
 module bushing(
-    outer_radius=BUSHING_DIAMETER/2,
+    outer_radius=DIAMETER/2,
     inner_radius=ROD_DIAMETER/2,
-    height=BUSHING_HEIGHT,
-    wall=BUSHING_WALL,
-    pins=ROD_PINS,
-    pin_coverage=ROD_PIN_COVERAGE,
-    chamfer_height=BUSHING_CHAMFER
+    height=HEIGHT,
+    wall=WALL,
+    pins=PINS,
+    pin_coverage=PIN_COVERAGE,
+    chamfer_height=CHAMFER
 ) {
     
     module chamfer_cone() {

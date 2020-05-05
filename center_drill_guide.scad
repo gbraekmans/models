@@ -1,5 +1,5 @@
 // Width of the stock to drill
-WIDTH = 30;
+WIDTH = 45;
 // Height of the drill bushing
 HEIGHT = 10;
 // Minimum wall thickness
@@ -9,7 +9,7 @@ WALL = 2;
 FLANGE = 5;
 
 // Diameter of the bushing
-BORE_DIAMETER = 8;
+BORE_DIAMETER = 4;
 
 module dummy() {};
 
